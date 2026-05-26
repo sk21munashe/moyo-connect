@@ -160,7 +160,7 @@ function App() {
       case 'assessment':
         setShowAssessment(true);
         return null;
-     default:
+    default:
         // 1. Mock Content Configs
         const dailyInsight = "Taking just 3 deep breaths can instantly reset your nervous system. Remember to pause today.";
 
