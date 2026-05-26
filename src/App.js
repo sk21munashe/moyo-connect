@@ -50,8 +50,8 @@ function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [mood, setMood] = useState(3);
   const [journalText, setJournalText] = useState('');
-  const [screenerAnswers, setScreenerAnswers] = useState({});
-  const [screenerResult, setScreenerResult] = useState(null);
+ // const [screenerAnswers, setScreenerAnswers] = useState({});
+ // const [screenerResult, setScreenerResult] = useState(null); 
 
   useEffect(() => {
     const unsubscribe = onAuthChange((firebaseUser) => {
