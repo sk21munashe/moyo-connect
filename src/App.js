@@ -160,8 +160,8 @@ function App() {
       case 'assessment':
         setShowAssessment(true);
         return null;
-    default:
-        // 1. Mock Content Configs
+   default:
+        // Content Configs
         const dailyInsight = "Taking just 3 deep breaths can instantly reset your nervous system. Remember to pause today.";
 
         const recentActivities = [
@@ -189,7 +189,7 @@ function App() {
               </Box>
             </Paper>
 
-            {/* 🆕 2. Streak & Progress Ribbons */}
+            {/* 2. Streak & Progress Ribbons */}
             <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
               {/* Streak Ribbon */}
               <Paper sx={{ flex: 1, p: 1.5, display: 'flex', alignItems: 'center', gap: 1, borderRadius: '12px', borderColor: '#E2E8F0' }}>
@@ -206,7 +206,6 @@ function App() {
                   <Typography variant="caption" sx={{ fontWeight: 600, color: '#718096' }}>Weekly Goal</Typography>
                   <Typography variant="caption" sx={{ fontWeight: 700, color: '#70A643' }}>60%</Typography>
                 </Box>
-                {/* Clean Material UI Custom Progress Bar */}
                 <Box sx={{ width: '100%', height: '6px', bgcolor: '#E2E8F0', borderRadius: '3px', overflow: 'hidden' }}>
                   <Box sx={{ width: '60%', height: '100%', bgcolor: '#70A643', borderRadius: '3px' }} />
                 </Box>
@@ -272,7 +271,7 @@ function App() {
               </Paper>
             </Box>
 
-            {/* 🆕 6. Resource Center (Horizontal Scroll Carousel) */}
+            {/* 6. Resource Center (Horizontal Scroll Carousel) */}
             <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1A365D', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Helpful Resources</Typography>
             <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 2, mb: 4, '::-webkit-scrollbar': { display: 'none' }, msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
               {resources.map((resource) => (
