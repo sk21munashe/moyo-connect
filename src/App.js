@@ -2,7 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Box, Container, Paper, Avatar, Typography, IconButton } from '@mui/material';
+import { 
+  Box, 
+  Container, 
+  Paper, 
+  Avatar, 
+  Typography, 
+  IconButton 
+} from '@mui/material';
 import Login from './Login';
 import YouthAssessment from './YouthAssessment';
 import Explore from './Explore';
@@ -10,158 +17,54 @@ import BottomNav from './components/BottomNav';
 import Profile from './components/Profile';
 import { onAuthChange, logOut } from './firebase';
 
-// Create custom theme matching image_c0a59a.jpg & image_c0a1c1.png
+// 1. App Theme Configuration
 const theme = createTheme({
   palette: {
-    primary: {
-      main: '#1A365D', // Deep Navy Blue from logo text
-    },
-    secondary: {
-      main: '#70A643', // Leaf Green from logo accent
-    },
-    background: {
-      default: '#F7FAFC', // Very soft grey/white page background
-    },
-    // Adding custom category palettes for reference
-    categories: {
-      youth: { bg: '#EBF4FF', text: '#2B6CB0' },       // Light Blue
-      caregiver: { bg: '#F0FDF4', text: '#48BB78' },   // Light Green
-      chw: { bg: '#FFF5F5', text: '#C53030' },         // Light Rose (Community Health Worker)
-      employer: { bg: '#FAF5FF', text: '#6B46C1' },    // Light Purple
-    }
+    primary: { main: '#1A365D' },     // Brand Deep Navy
+    secondary: { main: '#70A643' },   // Brand Leaf Green
+    background: { default: '#FAFAFA' } // Clean Dashboard Slate
   },
   typography: {
-    fontFamily: '"Inter", "Segoe UI", "Roboto", sans-serif',
-    h6: {
-      fontWeight: 700,
-      letterSpacing: '-0.01em',
-    }
-  },
-  shape: {
-    borderRadius: 16, // Smoother rounded corners matching the UI images
-  },
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+  }
 });
 
-function App() {
+export default function App() {
+  // 2. Core App State
   const [user, setUser] = useState(null);
-  const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [showAssessment, setShowAssessment] = useState(false);
-  const [currentPage, setCurrentPage] = useState('dashboard');
-  const [mood, setMood] = useState(3);
+  const [currentPage, setCurrentPage] = useState('home');
+  const [mood, setMood] = useState(null);
   const [journalText, setJournalText] = useState('');
- // const [screenerAnswers, setScreenerAnswers] = useState({});
- // const [screenerResult, setScreenerResult] = useState(null); 
 
+  // 3. Simple Authentication Observer hook
   useEffect(() => {
-    const unsubscribe = onAuthChange((firebaseUser) => {
-      if (firebaseUser) {
-        setUser(firebaseUser);
-        const savedRole = localStorage.getItem(`moyo_role_${firebaseUser.email}`);
-        if (savedRole) {
-          setUserRole(savedRole);
-          if (savedRole === 'youth') {
-            const lastAssessment = localStorage.getItem('moyo_last_assessment');
-            const needsAssessment = !lastAssessment || (Date.now() - new Date(JSON.parse(lastAssessment)?.date).getTime() > 7 * 24 * 60 * 60 * 1000);
-            setShowAssessment(needsAssessment);
-          }
-        }
-      } else {
-        setUser(null);
-        setUserRole(null);
-        setShowAssessment(false);
-      }
-      setLoading(false);
+    const unsubscribe = onAuthChange((currentUser) => {
+      setUser(currentUser);
     });
     return () => unsubscribe();
   }, []);
 
-  const handleLogin = (role) => {
-    setUserRole(role);
-    if (role === 'youth') {
-      const lastAssessment = localStorage.getItem('moyo_last_assessment');
-      const needsAssessment = !lastAssessment || (Date.now() - new Date(JSON.parse(lastAssessment)?.date).getTime() > 7 * 24 * 60 * 60 * 1000);
-      setShowAssessment(needsAssessment);
-    }
-  };
-
-  const handleLogout = async () => {
-    await logOut();
-    setUser(null);
-    setUserRole(null);
-    setShowAssessment(false);
-    setCurrentPage('dashboard');
-  };
-
-  const handleAssessmentComplete = (result) => {
-    setShowAssessment(false);
-    const assessmentData = {
-      date: new Date().toISOString(),
-      result: result
-    };
-    localStorage.setItem('moyo_last_assessment', JSON.stringify(assessmentData));
-  };
-
   const saveJournalEntry = () => {
-    alert('Journal saved! 🌟 Mood: ' + mood);
+    if (!journalText.trim()) return;
+    alert(`Journal Saved: "${journalText}"`);
     setJournalText('');
   };
 
-  // Dynamic background style helper based on current active user role
-  const getRoleStyles = (role) => {
-    switch(role) {
-      case 'youth': return theme.palette.categories.youth;
-      case 'caregiver': return theme.palette.categories.caregiver;
-      case 'chw': return theme.palette.categories.chw;
-      default: return theme.palette.categories.employer;
-    }
-  };
-
-  if (loading) {
-    return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#FFFFFF' }}>
-          <Box sx={{ textAlign: 'center' }}>
-            <Box sx={{ width: 50, height: 50, border: '5px solid #E2E8F0', borderTop: '5px solid #1A365D', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 20px' }} />
-            <Typography sx={{ color: '#1A365D', fontWeight: 600 }}>Loading MoyoConnect...</Typography>
-          </Box>
-        </Box>
-      </ThemeProvider>
-    );
-  }
-
-  if (!user || !userRole) {
-    return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Login onLogin={handleLogin} />
-      </ThemeProvider>
-    );
-  }
-
-  if (userRole === 'youth' && showAssessment) {
-    return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <YouthAssessment onComplete={handleAssessmentComplete} userEmail={user?.email} />
-      </ThemeProvider>
-    );
-  }
-
+  // 4. Content Navigation Handler
   const renderContent = () => {
-    const roleConfig = getRoleStyles(userRole);
+    if (!user) return <Login />;
 
-    switch(currentPage) {
+    switch (currentPage) {
       case 'explore':
         return <Explore />;
-      case 'profile':
-        return <Profile user={user} userRole={userRole} handleLogout={handleLogout} />;
       case 'assessment':
-        setShowAssessment(true);
-        return null;
-   default:
-        // Content Configs
+        return <YouthAssessment onBack={() => setCurrentPage('home')} />;
+      case 'profile':
+        return <Profile user={user} onLogOut={logOut} />;
+      
+      // THE NEW FULLY-LOADED DASHBOARD CASE
+      case 'home':
+      default:
         const dailyInsight = "Taking just 3 deep breaths can instantly reset your nervous system. Remember to pause today.";
 
         const recentActivities = [
@@ -191,7 +94,6 @@ function App() {
 
             {/* 2. Streak & Progress Ribbons */}
             <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-              {/* Streak Ribbon */}
               <Paper sx={{ flex: 1, p: 1.5, display: 'flex', alignItems: 'center', gap: 1, borderRadius: '12px', borderColor: '#E2E8F0' }}>
                 <Typography sx={{ fontSize: 22 }}>🔥</Typography>
                 <Box>
@@ -200,7 +102,6 @@ function App() {
                 </Box>
               </Paper>
 
-              {/* Progress Ribbon */}
               <Paper sx={{ flex: 1, p: 1.5, borderRadius: '12px', borderColor: '#E2E8F0' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
                   <Typography variant="caption" sx={{ fontWeight: 600, color: '#718096' }}>Weekly Goal</Typography>
@@ -340,25 +241,17 @@ function App() {
             </button>
           </Container>
         );
+    }
+  };
+
+  // 5. Main Component Wrapper Layout
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ pb: 7 }}>
+      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 7 }}>
         {renderContent()}
-        <BottomNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
+        {user && <BottomNav value={currentPage} onChange={setCurrentPage} />}
       </Box>
     </ThemeProvider>
   );
 }
-
-// Add animation style
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-`;
-document.head.appendChild(styleSheet);
-
-export default App;
