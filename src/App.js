@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Box, Container, Paper, Avatar, Typography, IconButton, Chip } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+import { Box, Container, Paper, Avatar, Typography, IconButton } from '@mui/material';
 import Login from './Login';
 import YouthAssessment from './YouthAssessment';
 import Explore from './Explore';
@@ -11,24 +10,35 @@ import BottomNav from './components/BottomNav';
 import Profile from './components/Profile';
 import { onAuthChange, logOut } from './firebase';
 
-// Create custom theme
+// Create custom theme matching image_c0a59a.jpg & image_c0a1c1.png
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#667eea',
+      main: '#1A365D', // Deep Navy Blue from logo text
     },
     secondary: {
-      main: '#764ba2',
+      main: '#70A643', // Leaf Green from logo accent
     },
     background: {
-      default: '#f5f5f5',
+      default: '#F7FAFC', // Very soft grey/white page background
     },
+    // Adding custom category palettes for reference
+    categories: {
+      youth: { bg: '#EBF4FF', text: '#2B6CB0' },       // Light Blue
+      caregiver: { bg: '#F0FDF4', text: '#48BB78' },   // Light Green
+      chw: { bg: '#FFF5F5', text: '#C53030' },         // Light Rose (Community Health Worker)
+      employer: { bg: '#FAF5FF', text: '#6B46C1' },    // Light Purple
+    }
   },
   typography: {
     fontFamily: '"Inter", "Segoe UI", "Roboto", sans-serif',
+    h6: {
+      fontWeight: 700,
+      letterSpacing: '-0.01em',
+    }
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: 16, // Smoother rounded corners matching the UI images
   },
 });
 
@@ -97,26 +107,24 @@ function App() {
     setJournalText('');
   };
 
-  const runScreener = () => {
-    let score = 0;
-    Object.values(screenerAnswers).forEach(ans => score += parseInt(ans) || 0);
-    let result = score <= 2 ? 'Minimal symptoms 🟢' : 
-                 score <= 4 ? 'Mild symptoms 🟡' : 
-                 score <= 6 ? 'Moderate symptoms 🟠' : 
-                 'Severe symptoms - Get help 🔴';
-    setScreenerResult({ score, result });
-    
-    if (score >= 6) alert('🚨 SAFETY ALERT: Please reach out to a CHW');
+  // Dynamic background style helper based on current active user role
+  const getRoleStyles = (role) => {
+    switch(role) {
+      case 'youth': return theme.palette.categories.youth;
+      case 'caregiver': return theme.palette.categories.caregiver;
+      case 'chw': return theme.palette.categories.chw;
+      default: return theme.palette.categories.employer;
+    }
   };
 
   if (loading) {
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#FFFFFF' }}>
           <Box sx={{ textAlign: 'center' }}>
-            <Box sx={{ width: 50, height: 50, border: '5px solid rgba(255,255,255,0.3)', borderTop: '5px solid white', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 20px' }} />
-            <Typography sx={{ color: 'white' }}>Loading MoyoConnect...</Typography>
+            <Box sx={{ width: 50, height: 50, border: '5px solid #E2E8F0', borderTop: '5px solid #1A365D', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 20px' }} />
+            <Typography sx={{ color: '#1A365D', fontWeight: 600 }}>Loading MoyoConnect...</Typography>
           </Box>
         </Box>
       </ThemeProvider>
@@ -142,6 +150,8 @@ function App() {
   }
 
   const renderContent = () => {
+    const roleConfig = getRoleStyles(userRole);
+
     switch(currentPage) {
       case 'explore':
         return <Explore />;
@@ -152,30 +162,51 @@ function App() {
         return null;
       default:
         return (
-          <Container maxWidth="sm" sx={{ pb: 10, pt: 2 }}>
-            {/* Header */}
-            <Paper sx={{ p: 2, mb: 2, borderRadius: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+          <Container maxWidth="sm" sx={{ pb: 10, pt: 3 }}>
+            
+            {/* Header Module Styled like Category Cards in image_c0a59a.jpg */}
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 3, 
+                mb: 3, 
+                borderRadius: 4, 
+                backgroundColor: roleConfig.bg, 
+                color: roleConfig.text,
+                border: '1px solid rgba(0,0,0,0.02)'
+              }}
+            >
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box>
-                  <Typography variant="h6">Hello, {user?.email?.split('@')[0]}! 👋</Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>Role: {userRole}</Typography>
+                  <Typography variant="h6" sx={{ color: '#1A365D' }}>
+                    Hello, {user?.email?.split('@')[0]}! 👋
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.8, textTransform: 'capitalize', fontWeight: 600 }}>
+                    Portal: {userRole} Survey
+                  </Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}>{userRole === 'youth' ? '🧒' : userRole === 'caregiver' ? '👪' : userRole === 'chw' ? '👩‍⚕️' : '💼'}</Avatar>
+                <Avatar sx={{ bgcolor: '#1A365D', fontSize: '1.2rem' }}>
+                  {userRole === 'youth' ? '🧒' : userRole === 'caregiver' ? '👪' : userRole === 'chw' ? '👩‍⚕️' : '💼'}
+                </Avatar>
               </Box>
             </Paper>
 
-            {/* Mood Check */}
-            <Paper sx={{ p: 2, mb: 2, borderRadius: 3 }}>
-              <Typography variant="subtitle1" gutterBottom>How are you feeling today?</Typography>
+            {/* Mood Check Module - Following image_c0a1c1.png clean frame layout */}
+            <Paper elevation={0} sx={{ p: 2.5, mb: 3, border: '1px solid #E2E8F0', borderRadius: 4 }}>
+              <Typography variant="subtitle1" sx={{ color: '#1A365D', fontWeight: 600, mb: 2 }}>
+                How are you feeling today?
+              </Typography>
               <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between' }}>
                 {['😢', '😐', '🙂', '😊', '🤩'].map((emoji, i) => (
                   <IconButton 
                     key={i} 
                     onClick={() => setMood(i+1)}
                     sx={{ 
-                      fontSize: 32, 
-                      bgcolor: mood === i+1 ? '#667eea' : '#f0f0f0',
-                      '&:hover': { bgcolor: mood === i+1 ? '#764ba2' : '#e0e0e0' }
+                      fontSize: 28, 
+                      bgcolor: mood === i+1 ? roleConfig.bg : '#F7FAFC',
+                      border: mood === i+1 ? `1px solid ${roleConfig.text}` : '1px solid #E2E8F0',
+                      transition: '0.2s ease',
+                      '&:hover': { bgcolor: mood === i+1 ? roleConfig.bg : '#EDF2F7' }
                     }}
                   >
                     {emoji}
@@ -184,21 +215,61 @@ function App() {
               </Box>
             </Paper>
 
-            {/* Journal */}
-            <Paper sx={{ p: 2, mb: 2, borderRadius: 3 }}>
-              <Typography variant="subtitle1" gutterBottom>Quick Journal</Typography>
+            {/* Journal Module - Matching clean line input design */}
+            <Paper elevation={0} sx={{ p: 2.5, mb: 3, border: '1px solid #E2E8F0', borderRadius: 4 }}>
+              <Typography variant="subtitle1" sx={{ color: '#1A365D', fontWeight: 600, mb: 1.5 }}>
+                Quick Journal
+              </Typography>
               <textarea
                 value={journalText}
                 onChange={(e) => setJournalText(e.target.value)}
                 placeholder="What's on your mind today?"
-                rows={3}
-                style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '8px', fontFamily: 'inherit', marginBottom: '10px' }}
+                rows={4}
+                style={{ 
+                  width: '100%', 
+                  padding: '12px', 
+                  border: '1px solid #E2E8F0', 
+                  borderRadius: '12px', 
+                  fontFamily: 'inherit', 
+                  fontSize: '14px',
+                  outline: 'none',
+                  backgroundColor: '#F7FAFC',
+                  marginBottom: '14px' 
+                }}
               />
-              <button onClick={saveJournalEntry} style={{ background: '#4CAF50', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}>Save Entry 💾</button>
+              <button 
+                onClick={saveJournalEntry} 
+                style={{ 
+                  background: '#70A643', // Clean Brand Green
+                  color: 'white', 
+                  border: 'none', 
+                  padding: '10px 22px', 
+                  borderRadius: '12px', 
+                  fontWeight: '600',
+                  cursor: 'pointer' 
+                }}
+              >
+                Save Entry 💾
+              </button>
             </Paper>
 
-            {/* Crisis Button */}
-            <button onClick={() => alert('Crisis Helpline: 0800-123-456')} style={{ background: '#f44336', color: 'white', border: 'none', padding: '15px', borderRadius: '8px', width: '100%', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}>
+            {/* Crisis Assistance Frame */}
+            <button 
+              onClick={() => alert('Crisis Helpline: 0800-123-456')} 
+              style={{ 
+                background: '#C53030', // Deep Red matching the layout constraints
+                color: 'white', 
+                border: 'none', 
+                padding: '14px', 
+                borderRadius: '12px', 
+                width: '100%', 
+                fontSize: '16px', 
+                fontWeight: 'bold', 
+                cursor: 'pointer', 
+                marginTop: '5px',
+                boxShadow: '0 4px 12px rgba(197, 48, 48, 0.2)'
+              }}
+            >
               🚨 I Need Help Now
             </button>
           </Container>
@@ -206,7 +277,6 @@ function App() {
     }
   };
 
-  // If assessment was triggered from nav
   if (currentPage === 'assessment') {
     return (
       <ThemeProvider theme={theme}>
