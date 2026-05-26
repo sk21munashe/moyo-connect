@@ -4,7 +4,7 @@ import { Container, Card, CardContent, Typography, Avatar, Box, Chip, Divider, B
 import EmailIcon from '@mui/icons-material/Email';
 import BadgeIcon from '@mui/icons-material/Badge';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+//import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const Profile = ({ user, userRole, handleLogout }) => {
   const getRoleIcon = () => {
